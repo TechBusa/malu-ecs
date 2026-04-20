@@ -1,0 +1,21 @@
+{
+  "name": "mecs-static",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "vite build"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "alpinejs": "^3.15.11",
+    "lucide": "^1.8.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "vite": "^8.0.9"
+  }
+}

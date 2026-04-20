@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MECS Engineering | Professional Mechanical Consulting</title>
+    <meta name="description" content="Elite Mechanical Consulting Engineers specializing in HVAC, Fire Safety, Wet Services, and BIM/CFD modeling.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Local Styles and Scripts -->
+    <link rel="stylesheet" href="/src/style.css">
+    <script type="module" src="/src/main.js"></script>
+</head>
+<body x-data="mecsApp()" class="min-h-screen bg-white text-mecs-dark font-sans antialiased selection-mecs" x-cloak>
+    <!-- Progress Bar -->
+    <div 
+        class="fixed top-0 left-0 right-0 h-1 bg-mecs-primary z-[60] origin-left transition-all duration-150" 
+        :style="`width: ${scrollProgress}%`"
+    ></div>
+
+    <!-- Navbar -->
+    <nav 
+        class="fixed top-0 w-full z-50 transition-all duration-300 px-6"
+        :class="isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-4'"
+    >
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img 
+                    src="/logo.png" 
+                    alt="MECS Logo" 
+                    class="w-20 h-20 md:w-24 md:h-24 object-contain" 
+                    @error="$el.src='https://picsum.photos/seed/mecs/200/200'"
+                />
+                <div class="flex flex-col">
+                    <span 
+                        class="font-display font-bold text-lg leading-none transition-colors"
+                        :class="isScrolled ? 'text-mecs-dark' : 'text-white'"
+                    >MECS</span>
+                    <span 
+                        class="text-[10px] font-medium tracking-widest uppercase transition-colors"
+                        :class="isScrolled ? 'text-mecs-dark/60' : 'text-white/60'"
+                    >Engineering</span>
+                </div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center gap-8">
+                <template x-for="link in [
+                    { name: 'Home', page: 'home' },
+                    { name: 'About', page: 'about' },
+                    { name: 'Services', page: 'services' },
+                    { name: 'Portfolio', page: 'portfolio' },
+                    { name: 'Gallery', page: 'gallery' },
+                    { name: 'Contact', page: 'contact' }
+                ]">
+                    <a 
+                        href="javascript:void(0)"
+                        @click="navigateTo(link.page)"
+                        class="text-sm font-semibold transition-colors hover:text-mecs-primary relative group"
+                        :class="currentPage === link.page ? 'text-mecs-primary' : (isScrolled ? 'text-mecs-dark' : 'text-white')"
+                    >
+                        <span x-text="link.name"></span>
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-mecs-primary transition-all group-hover:w-full" :class="currentPage === link.page ? 'w-full' : ''"></span>
+                    </a>
+                </template>
+                <a @click="navigateTo('contact')" href="javascript:void(0)" class="bg-mecs-primary hover:bg-[#7ab236] text-white px-5 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-mecs-primary/20 flex items-center justify-center">
+                    Request Quote
+                </a>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button class="md:hidden" @click="isMobileMenuOpen = !isMobileMenuOpen">
+                <i x-show="!isMobileMenuOpen" data-lucide="menu" :class="isScrolled ? 'text-mecs-dark' : 'text-white'"></i>
+                <i x-show="isMobileMenuOpen" data-lucide="x" :class="isScrolled ? 'text-mecs-dark' : 'text-white'"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div 
+            x-show="isMobileMenuOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-4"
+            class="absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 p-6 md:hidden"
+            x-cloak
+        >
+            <div class="flex flex-col gap-4">
+                <template x-for="link in [
+                    { name: 'Home', href: '#' },
+                    { name: 'About', href: '#about' },
+                    { name: 'Services', href: '#services' },
+                    { name: 'Portfolio', href: '#portfolio' },
+                    { name: 'Gallery', href: '#gallery' },
+                    { name: 'Contact', href: '#contact' }
+                ]">
+                    <a 
+                        :href="link.href" 
+                        class="text-lg font-semibold text-mecs-dark hover:text-mecs-primary"
+                        @click="isMobileMenuOpen = false"
+                        x-text="link.name"
+                    ></a>
+                </template>
+                <a 
+                    href="#contact" 
+                    class="bg-mecs-primary text-white px-6 py-3 rounded-xl font-bold mt-4 text-center"
+                    @click="isMobileMenuOpen = false"
+                >
+                    Request Consultation
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative">
+        <div x-show="currentPage === 'home'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
+            <!-- Hero -->
+        <section class="relative min-h-screen flex items-center pt-20 overflow-hidden bg-mecs-dark">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 bg-gradient-to-r from-mecs-dark via-mecs-dark/80 to-transparent z-10"></div>
+                <img src="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=2000" alt="Engineering" class="w-full h-full object-cover opacity-40" />
+            </div>
+            <div class="max-w-7xl mx-auto px-6 relative z-20 w-full">
+                <div class="max-w-3xl">
+                    <span class="inline-block px-4 py-1.5 bg-mecs-primary/10 border border-mecs-primary/20 text-mecs-primary rounded-full text-xs font-bold tracking-widest uppercase mb-6">Professional Mechanical Consulting</span>
+                    <h1 class="text-5xl md:text-7xl text-white mb-6 leading-[1.1] font-display font-bold">Engineering Africa’s <br/><span class="text-mecs-primary">Future</span> Through Innovation.</h1>
+                    <p class="text-xl text-gray-300 mb-10 leading-relaxed max-w-2xl">Leading Professional Mechanical Consulting Engineers (PrEng) specializing in HVAC, Fire Safety, and Wet Services.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <button @click="document.getElementById('services').scrollIntoView({behavior: 'smooth'})" class="bg-mecs-primary hover:bg-[#7ab236] text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center gap-2 group shadow-xl shadow-mecs-primary/20">
+                            Explore Our Services <i data-lucide="chevron-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                        <button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center gap-2 border border-white/10">
+                            <i data-lucide="play" class="w-5 h-5 fill-white"></i> Watch BIM Demo
+                        </button>
+                    </div>
+                </div>
+                <!-- Advantage Bar -->
+                <div class="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-12">
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-mecs-primary/20 transition-colors border border-white/5"><i data-lucide="users" class="text-mecs-primary w-6 h-6"></i></div>
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">100% Black Owned</span>
+                    </div>
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-mecs-primary/20 transition-colors border border-white/5"><i data-lucide="clock" class="text-mecs-primary w-6 h-6"></i></div>
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">12+ Years Experience</span>
+                    </div>
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-mecs-primary/20 transition-colors border border-white/5"><i data-lucide="shield-check" class="text-mecs-primary w-6 h-6"></i></div>
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">SANS Compliant</span>
+                    </div>
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-mecs-primary/20 transition-colors border border-white/5"><i data-lucide="award" class="text-mecs-primary w-6 h-6"></i></div>
+                        <span class="text-sm font-bold text-gray-400 group-hover:text-white transition-colors">PrEng Certified</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section id="about" class="py-24 bg-white overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+                <div class="relative">
+                    <div class="relative z-10 rounded-[60px] overflow-hidden shadow-2xl aspect-[4/5]">
+                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=1000" alt="Team" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-mecs-primary/20 mix-blend-multiply"></div>
+                    </div>
+                    <div class="absolute -bottom-10 -right-10 bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 z-20 max-w-[280px]">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-mecs-primary flex items-center justify-center text-white"><i data-lucide="award" class="w-6 h-6"></i></div>
+                            <div><p class="text-2xl font-black text-mecs-dark leading-none">12+</p><p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Years Experience</p></div>
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed font-medium">Led by registered Professional Engineers with a track record of multi-million Rand projects.</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">The Pedigree</span>
+                    <h2 class="text-4xl md:text-5xl mt-4 mb-8 font-display font-bold">Leading Mechanical Consulting in South Africa</h2>
+                    <p class="text-gray-600 text-lg mb-8 leading-relaxed">MECS (Pty) Ltd is a professional mechanical consulting engineering firm specialising in the design and delivery of HVAC systems, wet services, and fire engineering solutions.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-6 rounded-3xl bg-gray-50 border border-gray-100"><i data-lucide="eye" class="text-mecs-primary w-6 h-6 mb-4"></i><h4 class="font-bold text-lg mb-2">Our Vision</h4><p class="text-gray-500 text-sm">To be a leading mechanical consulting engineering firm in South Africa, recognised for delivering reliable solutions.</p></div>
+                        <div class="p-6 rounded-3xl bg-gray-50 border border-gray-100"><i data-lucide="target" class="text-mecs-primary w-6 h-6 mb-4"></i><h4 class="font-bold text-lg mb-2">Our Mission</h4><p class="text-gray-500 text-sm">To provide high-quality engineering design services that ensure smooth project execution and fast approvals.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services -->
+        <section id="services" class="py-24 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-20">
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Our Expertise</span>
+                    <h2 class="text-4xl md:text-5xl mt-4 mb-6 font-display font-bold">Comprehensive Mechanical Solutions</h2>
+                    <p class="text-gray-600 text-lg">We provide end-to-end engineering services, from initial concept and BIM modeling to final certification.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <template x-for="service in services">
+                        <div 
+                            class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 hover:border-mecs-primary/20 relative flex flex-col h-full"
+                            x-data="{ showCase: false }"
+                        >
+                            <div class="w-14 h-14 bg-mecs-primary/10 rounded-2xl flex items-center justify-center mb-6 shrink-0">
+                                <i :data-lucide="service.icon" class="text-mecs-primary w-7 h-7"></i>
+                            </div>
+                            <h3 class="text-xl mb-4 font-bold" x-text="service.title"></h3>
+                            <p class="text-gray-500 text-sm mb-6 leading-relaxed flex-grow" x-text="service.description"></p>
+                            
+                            <!-- Key Expertise List -->
+                            <ul class="space-y-3 mb-8">
+                                <template x-for="detail in service.details">
+                                    <li class="flex items-center gap-2 text-xs font-semibold text-mecs-dark">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-mecs-primary"></div>
+                                        <span x-text="detail"></span>
+                                    </li>
+                                </template>
+                            </ul>
+
+                            <!-- Case Study Toggle -->
+                            <div class="border-t border-gray-100 pt-6 mt-auto">
+                                <button 
+                                    @click="showCase = !showCase"
+                                    class="flex items-center gap-2 text-xs font-bold text-mecs-primary hover:text-mecs-dark transition-colors uppercase tracking-widest"
+                                >
+                                    <span x-text="showCase ? 'Close Project Info' : 'View Case Study'"></span>
+                                    <i x-show="!showCase" data-lucide="chevron-down" class="w-3 h-3"></i>
+                                    <i x-show="showCase" data-lucide="chevron-up" class="w-3 h-3"></i>
+                                </button>
+                                
+                                <div 
+                                    x-show="showCase" 
+                                    x-transition:enter="transition ease-out duration-300 transform"
+                                    x-transition:enter-start="opacity-0 -translate-y-2"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="mt-4 p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-3 text-xs"
+                                    x-cloak
+                                >
+                                    <div>
+                                        <p class="font-black text-mecs-dark uppercase tracking-tighter mb-1">Project</p>
+                                        <p class="text-gray-600 font-medium" x-text="service.caseStudy.project"></p>
+                                    </div>
+                                    <div>
+                                        <p class="font-black text-mecs-dark uppercase tracking-tighter mb-1">Challenge</p>
+                                        <p class="text-gray-500 leading-relaxed" x-text="service.caseStudy.challenge"></p>
+                                    </div>
+                                    <div>
+                                        <p class="font-black text-mecs-primary uppercase tracking-tighter mb-1">Result</p>
+                                        <p class="text-mecs-dark font-bold italic" x-text="service.caseStudy.result"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- BIM Section -->
+        <section class="py-24 bg-mecs-dark text-white overflow-hidden relative">
+            <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Technological Edge</span>
+                    <h2 class="text-4xl md:text-5xl mt-4 mb-8 font-display font-bold">The Power of BIM & CFD Modeling</h2>
+                    <div class="space-y-6">
+                        <div class="flex gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+                            <div class="w-12 h-12 rounded-xl bg-mecs-primary/10 flex items-center justify-center shrink-0"><i data-lucide="box" class="text-mecs-primary w-6 h-6"></i></div>
+                            <div><h4 class="font-bold text-lg mb-1">3D Revit Coordination</h4><p class="text-gray-500 text-sm">Clash detection and precision spatial planning.</p></div>
+                        </div>
+                        <div class="flex gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+                            <div class="w-12 h-12 rounded-xl bg-mecs-primary/10 flex items-center justify-center shrink-0"><i data-lucide="cpu" class="text-mecs-primary w-6 h-6"></i></div>
+                            <div><h4 class="font-bold text-lg mb-1">CFD Heat Mapping</h4><p class="text-gray-500 text-sm">Simulating airflow and thermal environments.</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div 
+                    class="relative group cursor-pointer" 
+                    @mouseenter="bimHover = true" 
+                    @mouseleave="bimHover = false"
+                >
+                    <div class="relative z-10 rounded-3xl overflow-hidden shadow-2xl border border-white/10 aspect-square">
+                        <img 
+                            src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&q=80&w=1000" 
+                            class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                            :class="bimHover ? 'opacity-0' : 'opacity-100'"
+                            alt="BIM Simulation 1"
+                        />
+                        <img 
+                            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000" 
+                            class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                            :class="bimHover ? 'opacity-100' : 'opacity-0'"
+                            alt="BIM Simulation 2"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-mecs-dark/80 to-transparent flex items-end p-8">
+                            <div><p class="text-mecs-primary font-bold text-sm mb-1">Interactive Simulation</p><p class="text-white font-medium">Hover to see transition from BIM to Reality</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio -->
+        <section id="portfolio" class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+                    <div class="max-w-2xl">
+                        <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Our Legacy</span>
+                        <h2 class="text-4xl md:text-5xl mt-4 mb-6 font-display font-bold">World-Class Project Portfolio</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="cat in ['All', 'Residential', 'Industrial', 'Public Sector']">
+                            <button 
+                                @click="portfolioFilter = cat" 
+                                class="px-6 py-2 rounded-full text-sm font-bold transition-all"
+                                :class="portfolioFilter === cat ? 'bg-mecs-primary text-white shadow-lg shadow-mecs-primary/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                                x-text="cat"
+                            ></button>
+                        </template>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <template x-for="project in [
+                        { title: 'Madala Hostel', value: 'R1 Billion+', location: 'South Africa', category: 'Residential', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000' },
+                        { title: 'Helen Joseph Hospital', value: 'Healthcare', location: 'Johannesburg', category: 'Public Sector', image: 'https://images.unsplash.com/photo-1587350859728-117699f4a1ec?auto=format&fit=crop&q=80&w=1000' },
+                        { title: 'Sogara Oil Refinery', value: 'International', location: 'Gabon', category: 'Industrial', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1000' }
+                    ].filter(p => portfolioFilter === 'All' || p.category === portfolioFilter)">
+                        <div class="group relative rounded-3xl overflow-hidden aspect-[4/5] shadow-xl">
+                            <img :src="project.image" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" :alt="project.title" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-mecs-dark via-mecs-dark/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                            <div class="absolute inset-0 p-8 flex flex-col justify-end">
+                                <div class="flex items-center gap-2 text-mecs-primary mb-2"><i data-lucide="map-pin" class="w-4 h-4"></i><span class="text-xs font-bold uppercase tracking-wider" x-text="project.location"></span></div>
+                                <h3 class="text-2xl text-white mb-2 font-bold" x-text="project.title"></h3>
+                                <div class="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
+                                    <div class="flex items-center gap-2"><i data-lucide="trending-up" class="text-mecs-primary w-4 h-4"></i><span class="text-white/80 text-sm font-medium" x-text="project.value"></span></div>
+                                    <button class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-mecs-primary transition-colors"><i data-lucide="external-link" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery -->
+        <section id="gallery" class="py-24 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Visual Showcase</span>
+                    <h2 class="text-4xl md:text-5xl mt-4 mb-6 font-display font-bold">Gallery & Media</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Videos -->
+                    <template x-for="i in [1, 2]">
+                        <div class="relative group rounded-2xl overflow-hidden aspect-video md:aspect-square col-span-2 md:col-span-1 bg-gray-200">
+                            <video 
+                                :src="`/video${i}.mp4`" 
+                                class="w-full h-full object-cover" 
+                                muted 
+                                loop 
+                                @mouseover="$el.play().catch(() => {})"
+                                @mouseout="$el.pause()"
+                                @error="$el.parentElement.innerHTML = '<div class=\'flex items-center justify-center h-full text-gray-400 text-xs\'>Video Not Found</div>'"
+                            ></video>
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:opacity-0 transition-opacity pointer-events-none">
+                                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center"><i data-lucide="play" class="text-white w-6 h-6 fill-white"></i></div>
+                            </div>
+                            <div class="absolute top-4 left-4 bg-mecs-primary text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest">Video</div>
+                        </div>
+                    </template>
+                    <!-- Images -->
+                    <template x-for="(i, index) in [1,2,3,4,5,6,7,8,9,10]">
+                        <div 
+                            class="relative group rounded-2xl overflow-hidden shadow-md bg-gray-100 cursor-pointer"
+                            @click="openLightbox(index)"
+                            :class="i === 1 ? 'md:col-span-2 md:row-span-2 aspect-auto' : 'aspect-square'"
+                        >
+                            <img 
+                                :src="`/Image${i}.png`" 
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                :alt="`Gallery ${i}`"
+                                @error="if (!$el.dataset.error) { $el.src = `https://picsum.photos/seed/mecs${i}/800/800`; $el.dataset.error = true; }"
+                            />
+                            <div class="absolute inset-0 bg-mecs-dark/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center"><i data-lucide="image" class="text-white w-5 h-5"></i></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16">
+                <div>
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Get In Touch</span>
+                    <h2 class="text-4xl md:text-5xl mt-4 mb-8 font-display font-bold">Start Your Next Landmark Project</h2>
+                    <div class="space-y-8">
+                        <div class="flex items-center gap-6 group">
+                            <div class="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-gray-100 group-hover:bg-mecs-primary transition-all"><i data-lucide="mail" class="text-mecs-primary group-hover:text-white w-6 h-6"></i></div>
+                            <div><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Email Us</p><a href="mailto:Michael@Maluleka-ecs.co.za" class="text-xl font-bold text-mecs-dark hover:text-mecs-primary">Michael@Maluleka-ecs.co.za</a></div>
+                        </div>
+                        <div class="flex items-center gap-6 group">
+                            <div class="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-gray-100 group-hover:bg-mecs-primary transition-all"><i data-lucide="phone" class="text-mecs-primary group-hover:text-white w-6 h-6"></i></div>
+                            <div><p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Call Us</p><a href="tel:+27718802302" class="text-xl font-bold text-mecs-dark hover:text-mecs-primary">+27 71 880 2302</a></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100">
+                    <h3 class="text-2xl mb-8 font-bold flex items-center gap-3"><i data-lucide="file-text" class="text-mecs-primary"></i> Request a Professional Quote</h3>
+                    
+                    <div x-show="!formSubmitted">
+                        <form class="space-y-4" @submit.prevent="formSubmitted = true">
+                            <!-- Contact Info -->
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Full Name</label>
+                                    <input type="text" x-model="formData.name" placeholder="John Doe" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none transition-all" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Email Address</label>
+                                    <input type="email" x-model="formData.email" placeholder="john@example.com" required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none transition-all" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Phone Number</label>
+                                    <input type="tel" x-model="formData.phone" placeholder="+27 ..." class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none transition-all" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Desired Service</label>
+                                    <select x-model="formData.service" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none appearance-none transition-all cursor-pointer">
+                                        <option value="HVAC Engineering">HVAC Engineering</option>
+                                        <option value="Fire Safety Design">Fire Safety Design</option>
+                                        <option value="Wet Services">Wet Services</option>
+                                        <option value="EPCM & Management">EPCM & Management</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Project Details -->
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Project Type</label>
+                                    <select x-model="formData.projectType" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none appearance-none transition-all cursor-pointer">
+                                        <option value="Commercial">Commercial</option>
+                                        <option value="Industrial">Industrial</option>
+                                        <option value="Residential">Residential</option>
+                                        <option value="Public Sector">Public Sector</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Timeline</label>
+                                    <input type="text" x-model="formData.timeline" placeholder="e.g. 6 Months" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none transition-all" />
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 tracking-widest">Project Description / Message</label>
+                                <textarea x-model="formData.message" rows="3" placeholder="Tell us more about your project requirements..." required class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3.5 focus:border-mecs-primary outline-none resize-none transition-all"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-mecs-primary hover:bg-[#7ab236] text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-mecs-primary/20 flex items-center justify-center gap-3 transition-all hover:-translate-y-1 active:translate-y-0">
+                                Generate Quote Request <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div 
+                        x-show="formSubmitted"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        class="text-center py-10"
+                        x-cloak
+                    >
+                        <div class="w-20 h-20 bg-mecs-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="check" class="text-mecs-primary w-10 h-10"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-4">Details Captured!</h4>
+                        <p class="text-gray-600 mb-8">How would you like to send your request to Michael Maluleka?</p>
+                        <div class="grid gap-4">
+                            <button @click="sendViaEmail" class="w-full bg-mecs-dark hover:bg-[#1f2937] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
+                                <i data-lucide="mail" class="w-5 h-5"></i> Send via Email
+                            </button>
+                            <button @click="sendViaWhatsApp" class="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all">
+                                <i data-lucide="message-circle" class="w-5 h-5"></i> Send via WhatsApp
+                            </button>
+                            <button @click="formSubmitted = false" class="text-gray-400 text-sm hover:text-mecs-primary transition-colors mt-4">
+                                Edit Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
+
+        <!-- Single Page Service View (Multi-page feel) -->
+        <div x-show="currentPage === 'services'" class="pt-32 pb-24" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="mb-16">
+                    <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Full Capabilities</span>
+                    <h2 class="text-5xl font-display font-bold mt-4">Engineering Services</h2>
+                    <p class="text-gray-500 mt-4 text-lg">Detailed overview of our professional mechanical consulting engineering offerings.</p>
+                </div>
+                
+                <div class="grid gap-12">
+                    <template x-for="service in services">
+                        <div class="bg-white rounded-[40px] p-8 md:p-12 shadow-xl border border-gray-100 grid md:grid-cols-2 gap-12 items-center">
+                            <div>
+                                <div class="w-16 h-16 bg-mecs-primary/10 rounded-2xl flex items-center justify-center mb-8">
+                                    <i :data-lucide="service.icon" class="text-mecs-primary w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold mb-4" x-text="service.title"></h3>
+                                <p class="text-gray-600 text-lg mb-8 leading-relaxed" x-text="service.description"></p>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <template x-for="detail in service.details">
+                                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-mecs-primary"></div>
+                                            <span class="text-xs font-bold text-mecs-dark" x-text="detail"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="bg-mecs-dark rounded-3xl p-8 text-white relative overflow-hidden">
+                                <div class="relative z-10">
+                                    <span class="text-mecs-primary font-bold text-xs uppercase tracking-widest mb-4 block">Selected Case Study</span>
+                                    <h4 class="text-2xl font-bold mb-4" x-text="service.caseStudy.project"></h4>
+                                    <p class="text-gray-400 mb-6 text-sm" x-text="service.caseStudy.challenge"></p>
+                                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
+                                        <p class="text-mecs-primary font-bold text-sm mb-1 uppercase">Technical Outcome</p>
+                                        <p class="text-lg font-display italic" x-text="service.caseStudy.result"></p>
+                                    </div>
+                                </div>
+                                <i :data-lucide="service.icon" class="absolute -bottom-10 -right-10 text-white/5 w-64 h-64"></i>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="mt-20 text-center">
+                    <button @click="navigateTo('contact')" class="bg-mecs-primary text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-2xl shadow-mecs-primary/20">
+                        Start Your Project with MECS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div x-show="currentPage === 'about'" class="pt-32 pb-24" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-20 items-center">
+                    <div>
+                        <span class="text-mecs-primary font-bold tracking-widest uppercase text-sm">Our Pedigree</span>
+                        <h2 class="text-5xl font-display font-bold mt-4 mb-8">Engineering Excellence for 12+ Years</h2>
+                        <div class="space-y-6 text-gray-600 text-lg leading-relaxed">
+                            <p>MECS (Pty) Ltd is a professional mechanical consulting engineering firm specialising in the design and delivery of high-end engineering systems across Africa.</p>
+                            <p>Our firm is built on the expertise of registered Professional Engineers (PrEng) who bring decades of combined experience in complex infrastructure and industrial projects.</p>
+                        </div>
+                        <div class="mt-12 grid grid-cols-2 gap-8">
+                            <div><p class="text-4xl font-bold text-mecs-dark">100%</p><p class="text-sm font-bold text-gray-400 uppercase">Black Owned (Level 1)</p></div>
+                            <div><p class="text-4xl font-bold text-mecs-dark">SANS</p><p class="text-sm font-bold text-gray-400 uppercase">10400 Compliant</p></div>
+                        </div>
+                    </div>
+                    <div class="rounded-[60px] overflow-hidden shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover aspect-square" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simple catch-all for other pages -->
+        <div x-show="['portfolio', 'gallery', 'contact'].includes(currentPage)" class="pt-32 pb-24 text-center">
+            <p class="text-gray-400 uppercase font-black tracking-widest text-sm mb-4">You are viewing the</p>
+            <h2 class="text-5xl font-display font-bold capitalize mb-8" x-text="currentPage"></h2>
+            <button @click="navigateTo('home')" class="text-mecs-primary font-bold flex items-center gap-2 mx-auto">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Back to Homepage
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-mecs-dark text-white pt-24 pb-12 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+                <div>
+                    <div class="flex items-center gap-3 mb-8">
+                        <img 
+                            src="/logo.png" 
+                            alt="Logo" 
+                            class="w-20 h-20 object-contain brightness-0 invert" 
+                            @error="$el.src='https://picsum.photos/seed/mecs/200/200'; $el.classList.remove('brightness-0', 'invert');"
+                        />
+                        <div class="flex flex-col"><span class="font-display font-bold text-lg leading-none">MECS</span><span class="text-[10px] font-medium tracking-widest uppercase text-white/60">Engineering</span></div>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-8">Engineering Africa’s Future Through Innovative Thinking.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-8">Quick Links</h4>
+                    <ul class="space-y-4 text-gray-400 text-sm">
+                        <template x-for="link in [
+                            { name: 'Home', href: '#' },
+                            { name: 'About', href: '#about' },
+                            { name: 'Services', href: '#services' },
+                            { name: 'Portfolio', href: '#portfolio' },
+                            { name: 'Gallery', href: '#gallery' },
+                            { name: 'Contact', href: '#contact' }
+                        ]">
+                            <li><a :href="link.href" class="hover:text-mecs-primary" x-text="link.name"></a></li>
+                        </template>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-8">Compliance</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                            <span class="text-mecs-primary font-bold text-xs">ECSA</span>
+                            <p class="text-xs text-gray-300">Registered PrEng</p>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                            <span class="text-mecs-primary font-bold text-xs">SANS</span>
+                            <p class="text-xs text-gray-300">Compliant Designs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
+                <p class="text-gray-500 text-xs">© 2026 MECS (Pty) Ltd. All Rights Reserved.</p>
+                <button 
+                    @click="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                    class="w-12 h-12 rounded-full bg-mecs-primary flex items-center justify-center shadow-lg shadow-mecs-primary/20"
+                >
+                    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Buttons -->
+    <a href="https://wa.me/+27718802302" target="_blank" rel="noreferrer" class="fixed bottom-6 left-6 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center group">
+        <i data-lucide="message-circle" class="w-6 h-6"></i>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 transition-all duration-500 whitespace-nowrap font-bold text-sm">Chat with us</span>
+    </a>
+
+    <!-- Chatbot -->
+    <div class="fixed bottom-6 right-6 z-[100]">
+        <button 
+            @click="chatOpen = !chatOpen" 
+            class="bg-mecs-primary text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center"
+        >
+            <i x-show="!chatOpen" data-lucide="message-square"></i>
+            <i x-show="chatOpen" data-lucide="x"></i>
+        </button>
+        
+        <div 
+            x-show="chatOpen"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-10"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-90 translate-y-10"
+            class="absolute bottom-20 right-0 w-[350px] max-w-[calc(100vw-3rem)] bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col h-[500px]"
+            x-cloak
+        >
+            <div class="bg-mecs-dark p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-mecs-primary flex items-center justify-center"><i data-lucide="bot" class="text-white w-6 h-6"></i></div>
+                <div><h3 class="text-white font-bold text-sm">MECS Assistant</h3><p class="text-mecs-primary text-[10px] font-bold uppercase tracking-widest">Online</p></div>
+            </div>
+            <div x-ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <template x-for="(msg, idx) in chatMessages">
+                    <div :class="msg.sender === 'user' ? 'ml-auto items-end' : 'items-start'" class="flex flex-col max-w-[80%]">
+                        <div 
+                            class="p-3 rounded-2xl text-sm shadow-sm"
+                            :class="msg.sender === 'user' ? 'bg-mecs-primary text-white rounded-tr-none' : 'bg-white text-mecs-dark rounded-tl-none border border-gray-100'"
+                            x-text="msg.text"
+                        ></div>
+                    </div>
+                </template>
+            </div>
+            <div class="p-4 bg-white border-t border-gray-100 flex gap-2">
+                <input 
+                    type="text" 
+                    x-model="chatInput" 
+                    @keydown.enter="sendChatMessage()" 
+                    placeholder="Ask a question..." 
+                    class="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm outline-none focus:border-mecs-primary" 
+                />
+                <button @click="sendChatMessage()" class="bg-mecs-primary text-white p-2 rounded-xl"><i data-lucide="send" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div 
+        x-show="lightboxOpen" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-10"
+        @keydown.escape.window="closeLightbox()"
+        @keydown.left.window="prevLightboxImage()"
+        @keydown.right.window="nextLightboxImage()"
+        x-cloak
+    >
+        <!-- Close Button -->
+        <button 
+            @click="closeLightbox()" 
+            class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[210] p-2 hover:bg-white/10 rounded-full"
+        >
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+
+        <!-- Navigation Buttons -->
+        <button 
+            @click="prevLightboxImage()" 
+            class="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 text-white/20 hover:text-mecs-primary transition-all z-[210] p-4 hover:bg-white/5 rounded-full"
+        >
+            <i data-lucide="chevron-left" class="w-12 h-12"></i>
+        </button>
+        
+        <button 
+            @click="nextLightboxImage()" 
+            class="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 text-white/20 hover:text-mecs-primary transition-all z-[210] p-4 hover:bg-white/5 rounded-full"
+        >
+            <i data-lucide="chevron-right" class="w-12 h-12"></i>
+        </button>
+
+        <!-- Image Display -->
+        <div class="relative w-full h-full flex items-center justify-center">
+            <template x-for="(img, idx) in galleryImages">
+                <div 
+                    x-show="lightboxIndex === idx"
+                    x-transition:enter="transition ease-out duration-500"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    class="absolute inset-0 flex flex-col items-center justify-center gap-6"
+                >
+                    <img 
+                        :src="img" 
+                        class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl border border-white/10" 
+                        @error="if (!$el.dataset.error) { $el.src = `https://picsum.photos/seed/mecslarge${idx}/1600/1200`; $el.dataset.error = true; }"
+                    />
+                    <div class="text-center">
+                        <p class="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Project Gallery</p>
+                        <h4 class="text-white text-xl font-bold font-display" x-text="`Media Specimen 0${idx + 1}`"></h4>
+                        <p class="text-mecs-primary text-sm font-bold mt-2" x-text="`${idx + 1} / ${galleryImages.length}`"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</body>
+</html>
